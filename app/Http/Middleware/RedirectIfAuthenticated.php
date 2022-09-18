@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 
 class RedirectIfAuthenticated
@@ -20,12 +21,22 @@ class RedirectIfAuthenticated
     public function handle(Request $request, Closure $next, ...$guards)
     {
         $guards = empty($guards) ? [null] : $guards;
+            
+            $guard = Arr::get($guards, 0);
 
-        foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+             switch($guard){
+                case 'admin':
+                    if (Auth::guard($guard)->check()) {
+                        return redirect('/admin');
+                    }
+                    break;
+                default:
+                    if (Auth::guard($guard)->check()) {
+                        return redirect('/');
+                    }
+                    break;
             }
-        }
+        
 
         return $next($request);
     }
